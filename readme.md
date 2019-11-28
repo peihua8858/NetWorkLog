@@ -1,7 +1,7 @@
 # Android 接口日志打印
 ## 功能介绍
     将接口日志参数打印到10.36.5.100:8090控制台
-### 6、网络日志
+### 网络日志使用
 ```java 
     new OkHttpClient.Builder()
                 .connectTimeout(30000, TimeUnit.MILLISECONDS)
