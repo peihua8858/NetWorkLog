@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.text.SimpleDateFormat;
@@ -218,7 +219,7 @@ public class NetLoggingInterceptor implements Interceptor {
             object.put("appName", mCallback.getAppName());
             object.put("platform", getPlatform(tag));
 
-            object.put("url", url);
+            object.put("url", URLDecoder.decode(url));
             object.put("request", requestBody);
             object.put("response", responseBody);
             object.put("device", Build.MODEL + "-" + Build.VERSION.RELEASE);

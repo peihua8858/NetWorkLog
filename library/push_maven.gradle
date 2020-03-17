@@ -1,11 +1,11 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 apply plugin: 'maven'
-def buildType = /*"SNAPSHOT"*/ "release"
+def buildType = true
 def mavenUrl = "http://10.36.5.100:8081/repository/globalegrow/"
 def mavenUrlSnapshot = "http://10.36.5.100:8081/repository/globalegrow-snapshot/"
 def mavenUserName = "longxl"
 def mavenPwd = "longxl123"
-def sdkVersionName = "1.0.1"
+def sdkVersionName = "1.0.2"
 def sdkVersionNameSnapshot = "1.0.0-SNAPSHOT"
 def pomName = "NetworkLog"
 def pomGroupId = "com.fz.networklog"
@@ -45,7 +45,7 @@ uploadArchives {
         mavenDeployer {
             println "start upload aar build type:" + buildType
             def ver = sdkVersionName
-            if (buildType == "release") {
+            if (buildType) {
                 println "uploadArchives build release"
                 repository(url: mavenUrl) {
                     authentication(userName: mavenUserName, password: mavenPwd)
