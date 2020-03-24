@@ -5,6 +5,8 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONObject;
 
 import java.io.EOFException;
@@ -86,6 +88,9 @@ public class NetLoggingInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
+        if (!mCallback.isEnabledLog()) {
+            return chain.proceed(chain.request());
+        }
         Response response = null;
         StringBuilder responseHeaderTag = new StringBuilder();
         long startNs = System.nanoTime();
@@ -248,12 +253,12 @@ public class NetLoggingInterceptor implements Interceptor {
 
         @Override
         public void onFailure(Call call, IOException e) {
-            Log.d("NetLog","NetLoggingInterceptor>>>error:" + e.getMessage());
+            Log.d("NetLog", "NetLoggingInterceptor>>>error:" + e.getMessage());
         }
 
         @Override
         public void onResponse(Call call, Response response) {
-            Log.d("NetLog","NetLoggingInterceptor>>>log:" + response.toString());
+            Log.d("NetLog", "NetLoggingInterceptor>>>log:" + response.toString());
         }
     }
 
@@ -306,6 +311,17 @@ public class NetLoggingInterceptor implements Interceptor {
          */
         default String getPlatform() {
             return getAppName() + "-Android";
+        }
+
+        /**
+         * 是否开启日志上传
+         *
+         * @author dingpeihua
+         * @date 2020/3/24 11:59
+         * @version 1.0
+         */
+        default boolean isEnabledLog() {
+            return true;
         }
     }
 }
