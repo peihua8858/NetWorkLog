@@ -269,7 +269,7 @@ public class NetLoggingInterceptor implements Interceptor {
         }
         builder.append("-");
         builder.append(platform());
-        if (TextUtils.isEmpty(logTag)) {
+        if (!TextUtils.isEmpty(logTag)) {
             builder.append("-").append(logTag);
         }
         return builder.toString();
