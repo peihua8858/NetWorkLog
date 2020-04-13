@@ -5,12 +5,11 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import org.json.JSONObject;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
@@ -110,7 +109,7 @@ public class NetLoggingInterceptor implements Interceptor {
         boolean hasRequestBody = requestBody != null;
         Connection connection = chain.connection();
         Protocol protocol = connection != null ? connection.protocol() : Protocol.HTTP_1_1;
-        String requestStartMessage = "<font   face=\"arial\" color=\"#6897bb\">" + url.toString() + " - 耗时：" + tookMs + " ms </font>" + protocol.toString();
+        String requestStartMessage = "<font   face=\"arial\" color=\"#6897bb\">" + decode(url.toString()) + " - 耗时：" + tookMs + " ms </font>" + protocol.toString();
         requestHeaderTag.append(requestStartMessage).append("<br/>");
         if (hasRequestBody) {
             if (requestBody.contentType() != null) {
@@ -218,13 +217,11 @@ public class NetLoggingInterceptor implements Interceptor {
             object.put("timestamp", date);
             object.put("requestHeader", requestHeader);
             object.put("responseHeader", responseHeader);
-            String phoneInfo = "android-" + Build.MODEL + "-" + Build.VERSION.RELEASE + "-" + Locale.getDefault().getLanguage();
-            object.put("level", phoneInfo);
+            object.put("level", getLevel());
             object.put("userId", mCallback.getAppName());
             object.put("appName", mCallback.getAppName());
             object.put("platform", getPlatform(tag));
-
-            object.put("url", URLDecoder.decode(url));
+            object.put("url", decode(url));
             object.put("request", requestBody);
             object.put("response", responseBody);
             object.put("device", Build.MODEL + "-" + Build.VERSION.RELEASE);
@@ -242,14 +239,52 @@ public class NetLoggingInterceptor implements Interceptor {
         }
     }
 
-    String getPlatform(String logTag) {
-        if (TextUtils.isEmpty(logTag)) {
-            return mCallback.getPlatform();
+    private String decode(String url) {
+        try {
+            return URLDecoder.decode(url, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
-        return mCallback.getPlatform() + "-" + logTag;
+        return url;
     }
 
-    static class ResponseCallback implements Callback {
+    private String getLevel() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(platform());
+        builder.append("-");
+        builder.append(Build.MODEL)
+                .append("-")
+                .append(Build.VERSION.RELEASE)
+                .append("-")
+                .append(Locale.getDefault().getLanguage());
+        return builder.toString();
+    }
+
+    private String getPlatform(String logTag) {
+        StringBuilder builder = new StringBuilder();
+        if (TextUtils.isEmpty(mCallback.getAppName())) {
+            builder.append("Zaful");
+        } else {
+            builder.append(mCallback.getAppName());
+        }
+        builder.append("-");
+        builder.append(platform());
+        if (TextUtils.isEmpty(logTag)) {
+            builder.append("-").append(logTag);
+        }
+        return builder.toString();
+    }
+
+    private String platform() {
+        String platform = mCallback.getPlatform();
+        if (TextUtils.isEmpty(platform)) {
+            return "Android";
+        } else {
+            return platform.toLowerCase().contains("ios") ? "iOS" : "Android";
+        }
+    }
+
+    private static class ResponseCallback implements Callback {
 
         @Override
         public void onFailure(Call call, IOException e) {
@@ -307,10 +342,10 @@ public class NetLoggingInterceptor implements Interceptor {
         /**
          * 域名,默认项目名称
          *
-         * @return
+         * @return 只能是android 或 iOS
          */
         default String getPlatform() {
-            return getAppName() + "-Android";
+            return "Android";
         }
 
         /**
