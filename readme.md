@@ -38,7 +38,7 @@
 
 ```py
 dependencies {
-    implementation "com.fz.networklog:NetworkLog:1.0.2"
+    implementation "com.fz.networklog:NetworkLog:1.0.9"
     implementation "com.squareup.okhttp3:okhttp:3.12.6"
     implementation "com.squareup.okio:okio:2.2.2"
     implementation "com.fz.klog:Klog:1.0.0"

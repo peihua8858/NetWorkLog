@@ -32,8 +32,11 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.internal.http.HttpHeaders;
+import okhttp3.internal.http.RealResponseBody;
 import okio.Buffer;
 import okio.BufferedSource;
+import okio.GzipSource;
+import okio.Okio;
 
 /**
  * 网络日志打印
@@ -112,10 +115,12 @@ public class NetLoggingInterceptor implements Interceptor {
         String requestStartMessage = "<font   face=\"arial\" color=\"#6897bb\">" + decode(url.toString()) + " - 耗时：" + tookMs + " ms </font>" + protocol.toString();
         requestHeaderTag.append(requestStartMessage).append("<br/>");
         if (hasRequestBody) {
-            if (requestBody.contentType() != null) {
+            if (requestBody.contentType() != null && request.header("Content-Type") == null) {
                 requestHeader.append("Content-Type: ").append(requestBody.contentType()).append("<br/>");
             }
-            requestHeader.append("Content-Length: ").append(requestBody.contentLength()).append("<br/>");
+            if (request.header("Content-Length") == null) {
+                requestHeader.append("Content-Length: ").append(requestBody.contentLength()).append("<br/>");
+            }
         }
         String requestBodyStr = "";
         Headers headers = request.headers();
@@ -161,12 +166,10 @@ public class NetLoggingInterceptor implements Interceptor {
         responseHeaderTag.append("<br/>");
         if (!HttpHeaders.hasBody(response)) {
             responseHeaderTag.append("<-- END HTTP<br/>");
-        } else if (bodyEncoded(response.headers())) {
-            responseHeaderTag.append("<-- END HTTP (encoded body omitted)<br/>");
         } else if (responseBody != null) {
             BufferedSource source = responseBody.source();
             source.request(Long.MAX_VALUE);
-            Buffer buffer = source.getBuffer();
+            Buffer buffer = source.getBuffer().clone();
             Charset charset = UTF8;
             MediaType contentType = responseBody.contentType();
             if (contentType != null) {
@@ -178,14 +181,26 @@ public class NetLoggingInterceptor implements Interceptor {
                     responseHeaderTag.append("<-- END HTTP<br/>");
                 }
             }
+            responseHeaderTag.append("<font color='#AE8ABE'>返回结果 </font>(")
+                    .append(response.code()).append(' ').append(response.message()).append("--")
+                    .append(buffer.size()).append("-byte body)<br/>");
             if (!isPlaintext(buffer)) {
-                responseHeaderTag.append("<br/>");
-                responseHeaderTag.append("<-- END HTTP (binary ").append(buffer.size()).append("-byte body omitted)<br/>");
+                boolean transparentGzip = false;
+                if (request.header("Accept-Encoding") != null) {
+                    transparentGzip = true;
+                }
+                if (transparentGzip && "gzip".equalsIgnoreCase(response.header("Content-Encoding"))
+                        && HttpHeaders.hasBody(response)) {
+                    BufferedSource source1 = Okio.buffer(new GzipSource(buffer));
+                    responseBodyStr = source1.readString(charset == null ? UTF8 : charset);
+                } else {
+                    responseHeaderTag.append("<br/>");
+                    responseHeaderTag.append("<-- END HTTP (binary ").append(buffer.size()).append("-byte body omitted)<br/>");
+                }
             } else {
-                responseHeaderTag.append("<font color='#AE8ABE'>返回结果 </font>(")
-                        .append(response.code()).append(' ').append(response.message()).append("--")
-                        .append(buffer.size()).append("-byte body)<br/>");
-                responseBodyStr = buffer.clone().readString(charset == null ? UTF8 : charset);
+                responseBodyStr = buffer.readString(charset == null ? UTF8 : charset);
+            }
+            if (!TextUtils.isEmpty(requestBodyStr)) {
                 responseHeaderTag.append("<pre style='color: #AAAAAA'>")
                         .append(Html.escapeHtml(responseBodyStr))
                         .append("</pre>");

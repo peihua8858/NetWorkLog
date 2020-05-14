@@ -24,8 +24,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly "com.squareup.okhttp3:okhttp:3.12.6"
-    compileOnly "com.squareup.okio:okio:2.2.2"
+    compileOnly "com.squareup.okhttp3:okhttp:3.12.10"
+    compileOnly "com.squareup.okio:okio:1.17.4"
     implementation "com.fz.klog:Klog:1.0.0"
 }
 apply from: "push_maven.gradle"

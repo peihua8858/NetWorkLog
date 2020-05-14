@@ -211,8 +211,6 @@ public class HttpLoggingInterceptor implements Interceptor {
 
             if (!logBody || !HttpHeaders.hasBody(response)) {
                 KLog.d("<-- END HTTP");
-            } else if (bodyEncoded(response.headers())) {
-                KLog.d("<-- END HTTP (encoded body omitted)");
             } else {
                 BufferedSource source = responseBody.source();
                 source.request(Long.MAX_VALUE); // Buffer the entire body.
