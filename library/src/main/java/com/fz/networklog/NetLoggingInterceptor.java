@@ -200,7 +200,7 @@ public class NetLoggingInterceptor implements Interceptor {
             } else {
                 responseBodyStr = buffer.readString(charset == null ? UTF8 : charset);
             }
-            if (!TextUtils.isEmpty(requestBodyStr)) {
+            if (!TextUtils.isEmpty(responseBodyStr)) {
                 responseHeaderTag.append("<pre style='color: #AAAAAA'>")
                         .append(Html.escapeHtml(responseBodyStr))
                         .append("</pre>");
@@ -213,7 +213,7 @@ public class NetLoggingInterceptor implements Interceptor {
     public void sendPost(String url, StringBuilder requestHeader, StringBuilder requestHeaderTag, String requestBody, StringBuilder responseHeader, StringBuilder responseHeaderTag, String responseBody, long timing) {
         String ip = mCallback.getServiceIp();
         if (TextUtils.isEmpty(ip)) {
-            ip = "10.36.5.100";
+            ip = "10.34.3.200";
         }
         String HOST = "http://" + ip + ":8090/pullLogcat";
         try {
