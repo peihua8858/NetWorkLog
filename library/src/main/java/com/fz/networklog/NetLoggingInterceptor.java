@@ -108,7 +108,7 @@ public class NetLoggingInterceptor implements Interceptor {
         StringBuilder requestHeader = new StringBuilder();
         StringBuilder responseHeader = new StringBuilder();
         HttpUrl url = request.url();
-        RequestBody requestBody = request.body();
+        RequestBody requestBody = chain.request().body();
         boolean hasRequestBody = requestBody != null;
         Connection connection = chain.connection();
         Protocol protocol = connection != null ? connection.protocol() : Protocol.HTTP_1_1;
@@ -206,14 +206,17 @@ public class NetLoggingInterceptor implements Interceptor {
                         .append("</pre>");
             }
         }
-        sendPost(url.toString(), requestHeader, requestHeaderTag, requestBodyStr, responseHeader, responseHeaderTag, responseBodyStr, tookMs);
+        sendPost(url.toString(), request.method(), requestHeader, requestHeaderTag, requestBodyStr, responseHeader,
+                responseHeaderTag, responseBodyStr, tookMs);
         return response;
     }
 
-    public void sendPost(String url, StringBuilder requestHeader, StringBuilder requestHeaderTag, String requestBody, StringBuilder responseHeader, StringBuilder responseHeaderTag, String responseBody, long timing) {
+    public void sendPost(String url, String method, StringBuilder requestHeader, StringBuilder requestHeaderTag,
+                         String requestBody, StringBuilder responseHeader,
+                         StringBuilder responseHeaderTag, String responseBody, long timing) {
         String ip = mCallback.getServiceIp();
         if (TextUtils.isEmpty(ip)) {
-            ip = "10.34.3.200";
+            ip = "10.32.5.200";
         }
         String HOST = "http://" + ip + ":8090/pullLogcat";
         try {
@@ -229,6 +232,7 @@ public class NetLoggingInterceptor implements Interceptor {
 
             JSONObject object = new JSONObject();
             object.put("body", bodyLog);
+            object.put("method", method);
             object.put("timestamp", date);
             object.put("requestHeader", requestHeader);
             object.put("responseHeader", responseHeader);
@@ -248,7 +252,7 @@ public class NetLoggingInterceptor implements Interceptor {
                     .url(HOST)//请求接口。如果需要传参拼接到接口后面。
                     .post(body)
                     .build();//创建Request 对象
-            okHttpClient.newCall(request).enqueue(new ResponseCallback());
+            okHttpClient.newCall(request).enqueue(new NetLoggingInterceptor.ResponseCallback());
         } catch (Exception e) {
             e.printStackTrace();
         }
