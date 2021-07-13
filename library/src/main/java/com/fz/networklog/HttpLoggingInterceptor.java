@@ -1,13 +1,3 @@
-/*
- * Copyright (C) Globalegrow E-Commerce Co. , Ltd. 2007-2018.
- * All rights reserved.
- * This software is the confidential and proprietary information
- * of Globalegrow E-Commerce Co. , Ltd. ("Confidential Information").
- * You shall not disclose such Confidential Information and shall
- * use it only in accordance with the terms of the license agreement
- * you entered into with Globalegrow.
- */
-
 package com.fz.networklog;
 
 import com.socks.library.KLog;
