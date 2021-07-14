@@ -29,19 +29,21 @@
 ## 添加存储库
 
 ```py
- repositories {
-        maven { url 'http://10.36.5.100:8081/repository/maven-public/' }
-    }
+ allprojects {
+ 		repositories {
+ 			...
+ 			maven { url 'https://jitpack.io' }
+ 		}
+ 	}
 ```
 
 ## 添加依赖
 
 ```py
 dependencies {
-    implementation "com.fz.networklog:NetworkLog:1.0.9"
+    implementation 'com.github.peihua8858:NetworkLog:Tag'
     implementation "com.squareup.okhttp3:okhttp:3.12.6"
     implementation "com.squareup.okio:okio:2.2.2"
-    implementation "com.fz.klog:Klog:1.0.0"
 }
 ```
 
