@@ -24,7 +24,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly "com.squareup.okhttp3:okhttp:4.9.0"
     compileOnly "com.squareup.okio:okio:2.9.0"
-    implementation 'com.github.peihua8858:Klog:1.0.0'
+    compileOnly 'com.github.peihua8858:KLog:1.0.0'
 }
 //apply from: "push_maven.gradle"
 apply plugin: 'com.github.dcendents.android-maven'
