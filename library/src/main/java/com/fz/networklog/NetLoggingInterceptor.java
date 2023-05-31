@@ -142,8 +142,13 @@ public class NetLoggingInterceptor implements Interceptor {
                 Buffer buffer = new Buffer();
                 requestBody.writeTo(buffer);
                 if (isPlaintext(buffer)) {
+                    charset = charset == null ? UTF8 : charset;
+                    if (buffer.size() >= 2097152L) {
+                        requestBodyStr = buffer.readString(2097152L, charset);
+                    }else{
+                        requestBodyStr = buffer.readString(charset);
+                    }
                     requestHeaderTag.append("<br/><font color='#AE8ABE'>请求参数 </font>(").append(requestBody.contentLength()).append("-byte body)<br/>");
-                    requestBodyStr = buffer.readString(charset == null ? UTF8 : charset);
                     requestHeaderTag
                             .append("<pre style='color: #AAAAAA'>")
                             .append(Html.escapeHtml(requestBodyStr))
