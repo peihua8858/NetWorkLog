@@ -5,6 +5,7 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.EOFException;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -48,7 +50,8 @@ import okio.Okio;
 public class NetLoggingInterceptor implements Interceptor {
     public static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
     final OkHttpClient okHttpClient;
-    private static final Charset UTF8 = Charset.forName("UTF-8");
+    @NotNull
+    private static final Charset UTF8 = StandardCharsets.UTF_8;
     private final OnDynamicParamCallback mCallback;
 
     public NetLoggingInterceptor(OnDynamicParamCallback callback) {
@@ -145,7 +148,7 @@ public class NetLoggingInterceptor implements Interceptor {
                     charset = charset == null ? UTF8 : charset;
                     if (buffer.size() >= 2097152L) {
                         requestBodyStr = buffer.readString(2097152L, charset);
-                    }else{
+                    } else {
                         requestBodyStr = buffer.readString(charset);
                     }
                     requestHeaderTag.append("<br/><font color='#AE8ABE'>请求参数 </font>(").append(requestBody.contentLength()).append("-byte body)<br/>");
@@ -153,8 +156,7 @@ public class NetLoggingInterceptor implements Interceptor {
                             .append("<pre style='color: #AAAAAA'>")
                             .append(Html.escapeHtml(requestBodyStr))
                             .append("</pre>");
-                    requestHeaderTag.append("<br/><br/>")
-                    ;
+                    requestHeaderTag.append("<br/><br/>");
                 } else {
                     requestHeaderTag.append("--> END ").append(request.method()).append(" (binary ")
                             .append(requestBody.contentLength()).append("-byte body omitted)<br/><br/>");
@@ -190,10 +192,7 @@ public class NetLoggingInterceptor implements Interceptor {
                     .append(response.code()).append(' ').append(response.message()).append("--")
                     .append(buffer.size()).append("-byte body)<br/>");
             if (!isPlaintext(buffer)) {
-                boolean transparentGzip = false;
-                if (request.header("Accept-Encoding") != null) {
-                    transparentGzip = true;
-                }
+                boolean transparentGzip = request.header("Accept-Encoding") != null;
                 if (transparentGzip && "gzip".equalsIgnoreCase(response.header("Content-Encoding"))
                         && HttpHeaders.hasBody(response)) {
                     BufferedSource source1 = Okio.buffer(new GzipSource(buffer));
@@ -209,6 +208,9 @@ public class NetLoggingInterceptor implements Interceptor {
                 responseHeaderTag.append("<pre style='color: #AAAAAA'>")
                         .append(Html.escapeHtml(responseBodyStr))
                         .append("</pre>");
+            }
+            if (responseBodyStr.isEmpty()) {
+                responseBodyStr = response.message();
             }
         }
         sendPost(url.toString(), request.method(), requestHeader, requestHeaderTag, requestBodyStr, responseHeader,
