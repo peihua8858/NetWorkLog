@@ -210,7 +210,7 @@ public class NetLoggingInterceptor implements Interceptor {
                         .append("</pre>");
             }
             if (responseBodyStr.isEmpty()) {
-                responseBodyStr = response.message();
+                responseBodyStr = "(" + response.code() + " " + response.message() + "--" + buffer.size() + "-byte body)";
             }
         }
         sendPost(url.toString(), request.method(), requestHeader, requestHeaderTag, requestBodyStr, responseHeader,
